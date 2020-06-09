@@ -23,8 +23,44 @@ const articleSchema = {
 
 const Article = mongoose.model("Article", articleSchema);
 
-app.route("/articles")
+// Requests targeting ONE article----------------------
+app.route("/articles/:articleTitle")
+// GET ONE ARTICLE ROUTE
+.get(function (req, res){
+    Article.findOne({title: req.params.articleTitle},function(err, foundArticle){
+        if (foundArticle){
+          console.log(foundArticle);
+          res.send(foundArticle);
+      } else {
+        res.send("No matching articles found.");
+      }
+    });
+  })
+// Update an article route
+  .put(function (req, res){
+    console.log("PUT / Update requested for");
+    console.log(req.params.articleTitle);
 
+      Article.updateOne(
+        {title: req.params.articleTitle},
+        {title: req.body.title, content: req.body.content},
+        function(err, result){
+          if (!err){
+            console.log(result);
+            res.send("Update applied.")
+        } else {
+          console.log(err);
+          console.log(result);
+          res.send("No matching articles found.");
+        }
+      });
+    })
+  ;
+
+
+// Requests targeting ALL articles----------------------
+app.route("/articles")
+// GET ALL ARTICLES ROUTE
 .get(
   function (req, res){
     Article.find(function(err, foundArticles){
@@ -35,9 +71,8 @@ app.route("/articles")
         res.send(err);
       }
     });
-  }
-)
-
+  })
+// POST new article ROUTE
 .post(function(req, res){
   console.log(req.body.title);
   console.log(req.body.content);
@@ -55,7 +90,7 @@ app.route("/articles")
     }
   });
 })
-
+// DELETE article ROUTE
 .delete(function(req, res){
   Article.deleteMany(function(err){
     if (!err){
